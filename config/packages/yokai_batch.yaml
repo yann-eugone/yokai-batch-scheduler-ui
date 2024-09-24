@@ -1,0 +1,22 @@
+yokai_batch:
+  storage:
+    filesystem: ~
+  launcher:
+    default: messenger
+    launchers:
+      messenger: messenger://messenger
+      simple: simple://simple
+  ui:
+    enabled: true
+    templating: sonata
+    security:
+      attributes:
+        list: PUBLIC_ACCESS
+        view: PUBLIC_ACCESS
+        traces: PUBLIC_ACCESS
+        logs: PUBLIC_ACCESS
+
+when@test:
+  yokai_batch:
+    launcher:
+      default: simple

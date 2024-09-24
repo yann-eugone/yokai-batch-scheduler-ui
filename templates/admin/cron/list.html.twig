@@ -1,0 +1,104 @@
+{% extends base_template %}
+
+{% trans_default_domain 'admin' %}
+
+{% block title %}
+    - {{ 'cron.name'|trans }}
+{% endblock %}
+
+{% block breadcrumb %}
+    <ol class="nav navbar-top-links breadcrumb">
+        <li>
+            <a href="{{ path('sonata_admin_dashboard') }}">
+                <i class="fa fa-home"></i>
+            </a>
+        </li>
+        <li class="active">
+            <span>
+                {{ 'cron.name'|trans }}
+            </span>
+        </li>
+    </ol>
+{% endblock %}
+
+{% block list_table %}
+    <div class="col-xs-12 col-md-12">
+        <div class="box box-primary">
+            <div class="box-body{% if crons|length > 0 %} table-responsive no-padding{% endif %}">
+                <table class="table table-bordered table-striped table-hover sonata-ba-list">
+                    <thead>
+                    <tr class="sonata-ba-list-filter-header">
+                        <th class="sonata-ba-list-filter-header-text">
+                            {{ 'cron.field.trigger'|trans }}
+                        </th>
+                        <th class="sonata-ba-list-filter-header-text">
+                            {{ 'cron.field.description'|trans }}
+                        </th>
+                        <th class="sonata-ba-list-filter-header-datetime">
+                            {{ 'cron.field.previousRunDate'|trans }}
+                        </th>
+                        <th class="sonata-ba-list-filter-header-text">
+                            {{ 'cron.field.previousStatus'|trans }}
+                        </th>
+                        <th class="sonata-ba-list-filter-header-datetime">
+                            {{ 'cron.field.nextRunDate'|trans }}
+                        </th>
+                        <th class="sonata-ba-list-filter-header-actions"></th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for name,cron in crons %}
+                        <tr>
+                            <td class="sonata-ba-list-field sonata-ba-list-field-text">
+                                <a href="https://crontab.guru/#{{ cron.trigger }}">
+                                    {{ cron.trigger }}
+                                </a>
+                            </td>
+                            <td class="sonata-ba-list-field sonata-ba-list-field-text">
+                                {% if is_granted('PUBLIC_ACCESS') %}
+                                    <a class="sonata-link-identifier" href="{{ path('admin_cron_show', { name: name }) }}">
+                                        {{ cron.description }}
+                                    </a>
+                                {% else %}
+                                    {{ cron.description }}
+                                {% endif %}
+                            </td>
+                            <td class="sonata-ba-list-field sonata-ba-list-field-datetime">
+                                {% if cron.lastExecution %}
+                                    {{ include('@SonataAdmin/CRUD/display_datetime.html.twig', {value: cron.lastExecution.startTime}) }}
+                                {% endif %}
+                            </td>
+                            <td class="sonata-ba-list-field sonata-ba-list-field-text">
+                                {% if cron.lastExecution %}
+                                    {{ include('@YokaiBatch/sonata/_status.html.twig', { execution: cron.lastExecution }) }}
+                                {% endif %}
+                            </td>
+                            <td class="sonata-ba-list-field sonata-ba-list-field-datetime">
+                                {{ include('@SonataAdmin/CRUD/display_datetime.html.twig', {value: cron.nextRunDate}) }}
+                            </td>
+                            <td class="sonata-ba-list-field sonata-ba-list-field-actions">
+                                <div class="btn-group">
+                                    {% if is_granted('PUBLIC_ACCESS') %}
+                                        <a
+                                            href="{{ path('admin_cron_show', { name: name }) }}"
+                                            class="btn btn-sm btn-default view_link"
+                                            title="{{ 'action_show'|trans({}, 'SonataAdminBundle') }}"
+                                        >
+                                            <i class="fa fa-eye" aria-hidden="true"></i>
+                                            {{ 'action_show'|trans({}, 'SonataAdminBundle') }}
+                                        </a>
+                                    {% endif %}
+                                </div>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block list_filters_actions %}
+    <ul></ul>
+{% endblock %}

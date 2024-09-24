@@ -1,0 +1,172 @@
+{% extends '@SonataAdmin/CRUD/base_show.html.twig' %}
+
+{% trans_default_domain 'admin' %}
+
+{# @var execution \Yokai\Batch\JobExecution #}
+
+{% set parameters = app.request.query.all('filter') %}
+
+{% block title %}
+    - {{ 'cron.name'|trans }}
+{% endblock %}
+
+{% block navbar_title %}
+    {{ 'title_show'|trans({'%name%': cron.description|u.truncate(100, '...') }, 'SonataAdminBundle') }}
+{% endblock %}
+
+{%- block actions -%}
+    {% if is_granted('PUBLIC_ACCESS') %}
+        <li>
+            <a href="{{ path('admin_cron_list') }}">
+                <i class="fa fa-th-list" aria-hidden="true"></i>
+                {{ 'link_action_list'|trans({}, 'SonataAdminBundle') }}
+            </a>
+        </li>
+    {% endif %}
+{%- endblock -%}
+
+{%- block tab_menu -%}
+{%- endblock -%}
+
+{% block breadcrumb %}
+    <ol class="nav navbar-top-links breadcrumb">
+        <li>
+            <a href="{{ path('sonata_admin_dashboard') }}">
+                <i class="fa fa-home"></i>
+            </a>
+        </li>
+        <li>
+            {% if is_granted('PUBLIC_ACCESS') %}
+                <a href="{{ path('admin_cron_list') }}">
+                    {{ 'cron.name'|trans }}
+                </a>
+            {% else %}
+                <span>
+                    {{ 'cron.name'|trans }}
+                </span>
+            {% endif %}
+        </li>
+        <li class="active">
+            <span>
+                {{ cron.description }}
+            </span>
+        </li>
+    </ol>
+{% endblock %}
+
+{% block show %}
+    <div class="sonata-ba-view">
+        {{ block('show_groups') }}
+    </div>
+{% endblock %}
+
+{% block show_groups %}
+    <div class="row">
+        <div class="col-md-7">
+            <div class="box box-primary">
+                <div class="box-body table-responsive no-padding">
+                    <table class="table table-bordered table-striped table-hover sonata-ba-list">
+                        <thead>
+                        <tr class="sonata-ba-list-filter-header">
+                            <th class="sonata-ba-list-filter-header-text">
+                                {{ 'job.field.status'|trans({}, 'YokaiBatchBundle') }}
+                            </th>
+                            <th class="sonata-ba-list-filter-header-datetime">
+                                {{ 'job.field.start_time'|trans({}, 'YokaiBatchBundle') }}
+                            </th>
+                            <th class="sonata-ba-list-filter-header-datetime">
+                                {{ 'job.field.end_time'|trans({}, 'YokaiBatchBundle') }}
+                            </th>
+                            <th class="sonata-ba-list-filter-header-actions"></th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for execution in executions %}
+                            <tr>
+                                <td class="sonata-ba-list-field sonata-ba-list-field-text">
+                                    {{ include('@YokaiBatch/sonata/_status.html.twig', { execution: execution }) }}
+                                </td>
+                                <td class="sonata-ba-list-field sonata-ba-list-field-datetime">
+                                    {{ include('@SonataAdmin/CRUD/display_datetime.html.twig', { value: execution.startTime }) }}
+                                </td>
+                                <td class="sonata-ba-list-field sonata-ba-list-field-datetime">
+                                    {{ include('@SonataAdmin/CRUD/display_datetime.html.twig', { value: execution.endTime }) }}
+                                </td>
+                                <td class="sonata-ba-list-field sonata-ba-list-field-actions">
+                                    <div class="btn-group">
+                                        {% if yokai_batch_grant_view(execution) %}
+                                            <a
+                                                href="{{ path('yokai_batch.job_view', { job: execution.jobName, id: execution.id }) }}"
+                                                class="btn btn-sm btn-default view_link"
+                                                title="{{ 'action_show'|trans({}, 'SonataAdminBundle') }}"
+                                            >
+                                                <i class="fa fa-eye" aria-hidden="true"></i>
+                                                {{ 'action_show'|trans({}, 'SonataAdminBundle') }}
+                                            </a>
+                                        {% endif %}
+                                        {% if yokai_batch_grant_logs(execution) %}
+                                            <a
+                                                href="{{ path('yokai_batch.job_logs', { job: execution.jobName, id: execution.id }) }}"
+                                                class="btn btn-sm btn-default"
+                                                title="{{ 'job.action.download_logs'|trans({}, 'YokaiBatchBundle') }}"
+                                            >
+                                                <i class="fa fa-download" aria-hidden="true"></i> {{ 'job.action.download_logs'|trans({}, 'YokaiBatchBundle') }}
+                                            </a>
+                                        {% endif %}
+                                    </div>
+                                </td>
+                            </tr>
+                        {% else %}
+                            <tr>
+                                <td colspan="4" class="text-center">
+                                    {{ 'cron.message.no_job_execution'|trans }}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                        <tfoot>
+                        <tr>
+                            <td colspan="4">
+                                {% if yokai_batch_grant_list() %}
+                                    <a href="{{ path('yokai_batch.job_list', { filter: { jobs: [name] } }) }}" class="btn btn-default">
+                                        <i class="fa fa-eye" aria-hidden="true"></i>
+                                        {{ 'cron.message.see_all_job_executions'|trans }}
+                                    </a>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-5">
+            <div class="box box-primary">
+                <div class="box-body table-responsive no-padding">
+                    <table class="table">
+                        <tbody>
+                        <tr class="sonata-ba-view-container">
+                            <th>{{ 'cron.field.trigger'|trans }}</th>
+                            <td>
+                                <a href="https://crontab.guru/#{{ cron.trigger }}">
+                                    {{ cron.trigger }}
+                                </a>
+                            </td>
+                        </tr>
+                        <tr class="sonata-ba-view-container">
+                            <th>{{ 'cron.field.description'|trans }}</th>
+                            <td>{{ cron.description }}</td>
+                        </tr>
+                        <tr class="sonata-ba-view-container">
+                            <th>{{ 'cron.field.nextRunDate'|trans }}</th>
+                            <td>
+                                {{ include('@SonataAdmin/CRUD/display_datetime.html.twig', {value: cron.nextRunDate}) }}
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

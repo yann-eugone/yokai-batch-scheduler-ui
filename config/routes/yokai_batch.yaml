@@ -1,0 +1,2 @@
+_yokai_batch:
+    resource: "@YokaiBatchBundle/Resources/routing/ui.xml"

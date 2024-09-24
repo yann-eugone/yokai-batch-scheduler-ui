@@ -1,0 +1,22 @@
+sonata_admin:
+    title: 'Sonata Admin'
+    dashboard:
+        blocks:
+            - { type: sonata.admin.block.admin_list, position: left }
+        groups:
+            system:
+                label: System
+                icon: '<i class="fa fa-cogs"></i>'
+                translation_domain: admin
+                items:
+                    - route: yokai_batch.job_list
+                      label: job.name
+                      roles: ['PUBLIC_ACCESS']
+                    - route: admin_cron_list
+                      label: cron.name
+                      roles: ['PUBLIC_ACCESS']
+
+sonata_block:
+    blocks:
+        sonata.admin.block.admin_list:
+            contexts: [admin]
